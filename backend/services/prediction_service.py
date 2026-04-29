@@ -9,29 +9,29 @@ def predict_event_impact(event: EventInput) -> PredictionResponse:
     severity = event.severity
 
     # --- RULE 1: Sanctions ---
-    if event.event_type == "sanction":
-        if event.sector == "energy":
+    if event.event_type.value == "sanction":
+        if event.sector.value == "energy":
             price_impacts["oil"] = f"+{int(10 * severity)}%"
             price_impacts["gas"] = f"+{int(8 * severity)}%"
             affected_industries.update(["energy", "transport"])
 
-        elif event.sector == "technology":
+        elif event.sector.value == "technology":
             price_impacts["semiconductors"] = f"+{int(12 * severity)}%"
             affected_industries.update(["electronics", "automotive"])
 
     # --- RULE 2: War ---
-    elif event.event_type == "war":
+    elif event.event_type.value == "war":
         shipping_delay += int(2 * severity)
         price_impacts["oil"] = f"+{int(15 * severity)}%"
         affected_industries.update(["energy", "logistics", "defense"])
 
     # --- RULE 3: Tariffs ---
-    elif event.event_type == "tariff":
+    elif event.event_type.value == "tariff":
         price_impacts["manufacturing"] = f"+{int(5 * severity)}%"
         affected_industries.update(["manufacturing", "retail"])
 
     # --- RULE 4: Port Closure ---
-    elif event.event_type == "port_closure":
+    elif event.event_type.value == "port_closure":
         shipping_delay += int(3 * severity)
         affected_industries.update(["logistics", "global_trade"])
 
