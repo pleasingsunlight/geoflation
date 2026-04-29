@@ -2,13 +2,54 @@ from backend.models.schemas import EventInput, PredictionResponse
 
 
 def predict_event_impact(event: EventInput) -> PredictionResponse:
-    """
-    Placeholder logic (will be replaced with rule engine in next step)
-    """
+    price_impacts = {}
+    shipping_delay = 0
+    affected_industries = set()
+
+    severity = event.severity
+
+    # --- RULE 1: Sanctions ---
+    if event.event_type == "sanction":
+        if event.sector == "energy":
+            price_impacts["oil"] = f"+{int(10 * severity)}%"
+            price_impacts["gas"] = f"+{int(8 * severity)}%"
+            affected_industries.update(["energy", "transport"])
+
+        elif event.sector == "technology":
+            price_impacts["semiconductors"] = f"+{int(12 * severity)}%"
+            affected_industries.update(["electronics", "automotive"])
+
+    # --- RULE 2: War ---
+    elif event.event_type == "war":
+        shipping_delay += int(2 * severity)
+        price_impacts["oil"] = f"+{int(15 * severity)}%"
+        affected_industries.update(["energy", "logistics", "defense"])
+
+    # --- RULE 3: Tariffs ---
+    elif event.event_type == "tariff":
+        price_impacts["manufacturing"] = f"+{int(5 * severity)}%"
+        affected_industries.update(["manufacturing", "retail"])
+
+    # --- RULE 4: Port Closure ---
+    elif event.event_type == "port_closure":
+        shipping_delay += int(3 * severity)
+        affected_industries.update(["logistics", "global_trade"])
+
+    # --- DEFAULT RULE ---
+    if not price_impacts:
+        price_impacts["general"] = f"+{int(3 * severity)}%"
+
+    # --- RISK SEVERITY ---
+    if severity > 0.7:
+        risk = "High"
+    elif severity > 0.4:
+        risk = "Medium"
+    else:
+        risk = "Low"
 
     return PredictionResponse(
-        price_impacts={"oil": "0%", "gas": "0%"},
-        shipping_delay_weeks=0,
-        affected_industries=[],
-        risk_severity="Low"
+        price_impacts=price_impacts,
+        shipping_delay_weeks=shipping_delay,
+        affected_industries=list(affected_industries),
+        risk_severity=risk
     )
