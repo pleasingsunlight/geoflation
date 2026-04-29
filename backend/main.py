@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from backend.api.health import router as health_router
+from backend.api.predict import router as predict_router
 
 app = FastAPI(
     title="Geoflation API",
@@ -7,8 +8,8 @@ app = FastAPI(
     version="0.1.0"
 )
 
-# Register routes
 app.include_router(health_router)
+app.include_router(predict_router)
 
 
 @app.get("/")
