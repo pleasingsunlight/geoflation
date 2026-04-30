@@ -46,3 +46,16 @@ class TradeEdge(BaseModel):
 class TradeNetworkResponse(BaseModel):
     nodes: List[TradeNode]
     edges: List[TradeEdge]
+
+class CommodityPoint(BaseModel):
+    date: str
+    price: float
+
+
+class CommoditySeries(BaseModel):
+    commodity: str
+    data: List[CommodityPoint]
+
+
+class CommodityTrendsResponse(BaseModel):
+    trends: List[CommoditySeries]
