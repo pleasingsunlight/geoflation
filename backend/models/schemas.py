@@ -30,3 +30,19 @@ class PredictionResponse(BaseModel):
     shipping_delay_weeks: int
     affected_industries: List[str]
     risk_severity: str
+
+class TradeNode(BaseModel):
+    id: str
+    name: str
+    type: str  # country / port / commodity
+
+
+class TradeEdge(BaseModel):
+    source: str
+    target: str
+    weight: float  # trade volume or dependency strength
+
+
+class TradeNetworkResponse(BaseModel):
+    nodes: List[TradeNode]
+    edges: List[TradeEdge]
