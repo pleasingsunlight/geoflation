@@ -23,3 +23,7 @@ data/raw/*
 data/processed/*
 !data/raw/.keep
 !data/processed/.keep
+
+# Node
+node_modules/
+.next/
