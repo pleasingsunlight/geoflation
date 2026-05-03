@@ -1,5 +1,7 @@
 "use client";
 
+import ImpactPanel from "./ImpactPanel";
+
 import { useState } from "react";
 
 export default function EventForm() {
@@ -85,14 +87,7 @@ export default function EventForm() {
         </button>
       </form>
 
-      {result && (
-        <div className="mt-6 p-4 border">
-          <h2 className="font-semibold">Results</h2>
-          <pre className="text-sm mt-2">
-            {JSON.stringify(result, null, 2)}
-          </pre>
-        </div>
-      )}
+      <ImpactPanel data={result} />
     </div>
   );
 }
