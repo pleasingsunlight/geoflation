@@ -1,6 +1,12 @@
+import joblib
+from sklearn.ensemble import RandomForestRegressor
+
 from backend.data_pipeline.ingestion import load_data
 from backend.data_pipeline.preprocessing import preprocess
 from backend.data_pipeline.feature_engineering import build_features
+
+
+MODEL_PATH = "backend/ml_models/model.joblib"
 
 
 def train_model():
@@ -8,13 +14,17 @@ def train_model():
     df = preprocess(df)
     X, y = build_features(df)
 
-    print("Training data shape:", X.shape)
-    print("Targets shape:", y.shape)
+    model = RandomForestRegressor(n_estimators=50, random_state=42)
+    model.fit(X, y)
 
-    # Placeholder (real model comes next step)
-    return {
-        "status": "training_stub_complete"
-    }
+    joblib.dump(model, MODEL_PATH)
+
+    print("Model trained and saved at:", MODEL_PATH)
+
+
+def predict(X):
+    model = joblib.load(MODEL_PATH)
+    return model.predict(X)
 
 
 if __name__ == "__main__":
