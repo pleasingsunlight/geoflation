@@ -2,6 +2,7 @@ from backend.models.schemas import TradeNode, TradeEdge, TradeNetworkResponse
 from datetime import datetime, timedelta
 import random
 from backend.models.schemas import CommodityPoint, CommoditySeries, CommodityTrendsResponse
+from backend.ml_models.price_forecast import forecast_commodity
 
 
 
@@ -27,24 +28,12 @@ def get_trade_network() -> TradeNetworkResponse:
 
 
 def get_commodity_trends() -> CommodityTrendsResponse:
-    """
-    Mock time-series data (simulates forecast output)
-    """
+    oil = forecast_commodity(80)
+    gas = forecast_commodity(50)
+    wheat = forecast_commodity(30)
 
-    base_date = datetime.now()
-
-    def generate_series(name, base_price):
-        data = []
-        for i in range(10):
-            date = (base_date + timedelta(days=i)).strftime("%Y-%m-%d")
-            price = base_price + random.uniform(-5, 5)
-            data.append(CommodityPoint(date=date, price=round(price, 2)))
-        return CommoditySeries(commodity=name, data=data)
-
-    trends = [
-        generate_series("oil", 80),
-        generate_series("gas", 50),
-        generate_series("wheat", 30),
-    ]
-
-    return CommodityTrendsResponse(trends=trends)
+    return CommodityTrendsResponse(trends=[
+        CommoditySeries(commodity="oil", data=oil),
+        CommoditySeries(commodity="gas", data=gas),
+        CommoditySeries(commodity="wheat", data=wheat),
+    ])
