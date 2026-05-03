@@ -17,10 +17,14 @@ def train_model():
     model = RandomForestRegressor(n_estimators=50, random_state=42)
     model.fit(X, y)
 
-    joblib.dump(model, MODEL_PATH)
+    # Save both model AND columns
+    joblib.dump({
+        "model": model,
+        "columns": X.columns.tolist()
+    }, MODEL_PATH)
 
     print("Model trained and saved at:", MODEL_PATH)
-
+    
 
 def predict(X):
     model = joblib.load(MODEL_PATH)

@@ -1,55 +1,55 @@
 from backend.models.schemas import EventInput, PredictionResponse
+from backend.ml_models.model_loader import get_model
+from backend.data_pipeline.feature_engineering import build_features_from_event
 
 
 def predict_event_impact(event: EventInput) -> PredictionResponse:
-    price_impacts = {}
-    shipping_delay = 0
-    affected_industries = set()
+    try:
+        model, columns = get_model()
 
-    severity = event.severity
+        X = build_features_from_event(event)
 
-    # --- RULE 1: Sanctions ---
-    if event.event_type.value == "sanction":
-        if event.sector.value == "energy":
-            price_impacts["oil"] = f"+{int(10 * severity)}%"
-            price_impacts["gas"] = f"+{int(8 * severity)}%"
-            affected_industries.update(["energy", "transport"])
+        # Align columns with training
+        for col in columns:
+            if col not in X.columns:
+                X[col] = 0
 
-        elif event.sector.value == "technology":
-            price_impacts["semiconductors"] = f"+{int(12 * severity)}%"
-            affected_industries.update(["electronics", "automotive"])
+        X = X[columns]
 
-    # --- RULE 2: War ---
-    elif event.event_type.value == "war":
-        shipping_delay += int(2 * severity)
-        price_impacts["oil"] = f"+{int(15 * severity)}%"
-        affected_industries.update(["energy", "logistics", "defense"])
+        preds = model.predict(X)[0]
 
-    # --- RULE 3: Tariffs ---
-    elif event.event_type.value == "tariff":
-        price_impacts["manufacturing"] = f"+{int(5 * severity)}%"
-        affected_industries.update(["manufacturing", "retail"])
+        oil, gas, delay = preds
 
-    # --- RULE 4: Port Closure ---
-    elif event.event_type.value == "port_closure":
-        shipping_delay += int(3 * severity)
-        affected_industries.update(["logistics", "global_trade"])
+        return PredictionResponse(
+            price_impacts={
+                "oil": f"{round(oil, 2)}%",
+                "gas": f"{round(gas, 2)}%"
+            },
+            shipping_delay_weeks=int(max(0, delay)),
+            affected_industries=[event.sector.value],
+            risk_severity=_map_risk(event.severity)
+        )
 
-    # --- DEFAULT RULE ---
-    if not price_impacts:
-        price_impacts["general"] = f"+{int(3 * severity)}%"
+    except Exception as e:
+        print("ML failed, fallback to rule-based:", e)
+        return _rule_based_fallback(event)
 
-    # --- RISK SEVERITY ---
+
+# --- Helper Functions ---
+
+def _map_risk(severity: float) -> str:
     if severity > 0.7:
-        risk = "High"
+        return "High"
     elif severity > 0.4:
-        risk = "Medium"
-    else:
-        risk = "Low"
+        return "Medium"
+    return "Low"
 
+
+def _rule_based_fallback(event: EventInput) -> PredictionResponse:
+    # simplified fallback
     return PredictionResponse(
-        price_impacts=price_impacts,
-        shipping_delay_weeks=shipping_delay,
-        affected_industries=list(affected_industries),
-        risk_severity=risk
+        price_impacts={"general": "+5%"},
+        shipping_delay_weeks=1,
+        affected_industries=[event.sector.value],
+        risk_severity=_map_risk(event.severity)
     )
