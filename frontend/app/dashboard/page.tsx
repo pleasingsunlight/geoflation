@@ -1,10 +1,13 @@
+import Charts from "../components/Charts";
+import TradeGraph from "../components/TradeGraph";
+
 export default function Dashboard() {
   return (
-    <div>
+    <div className="space-y-8">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <p className="mt-2 text-gray-600">
-        Trade network and commodity trends will appear here.
-      </p>
+
+      <Charts />
+      <TradeGraph />
     </div>
   );
 }
