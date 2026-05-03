@@ -4,10 +4,14 @@ import pandas as pd
 def build_features(df: pd.DataFrame):
     df = df.copy()
 
-    # Encode categorical variables
+    # New engineered features
+    df["is_energy"] = (df["sector"] == "energy").astype(int)
+    df["is_conflict"] = df["event_type"].isin(["war"]).astype(int)
+    df["high_severity"] = (df["severity"] > 0.7).astype(int)
+
+    # One-hot encoding
     df = pd.get_dummies(df, columns=["event_type", "sector"])
 
-    # Features
     feature_cols = [col for col in df.columns if col not in [
         "oil_price_change",
         "gas_price_change",
@@ -16,24 +20,25 @@ def build_features(df: pd.DataFrame):
     ]]
 
     X = df[feature_cols]
-
-    # Targets
     y = df[["oil_price_change", "gas_price_change", "delay_weeks"]]
 
     return X, y
 
 def build_features_from_event(event):
+    import pandas as pd
 
-    data = {
-        "event_type": [event.event_type.value],
-        "sector": [event.sector.value],
-        "severity": [event.severity],
-        "country": [event.country],
-    }
+    df = pd.DataFrame([{
+        "event_type": event.event_type.value,
+        "sector": event.sector.value,
+        "severity": event.severity,
+        "country": event.country,
+    }])
 
-    df = pd.DataFrame(data)
+    # SAME engineered features
+    df["is_energy"] = (df["sector"] == "energy").astype(int)
+    df["is_conflict"] = (df["event_type"] == "war").astype(int)
+    df["high_severity"] = (df["severity"] > 0.7).astype(int)
 
-    # Apply same encoding as training
     df = pd.get_dummies(df, columns=["event_type", "sector"])
 
     return df

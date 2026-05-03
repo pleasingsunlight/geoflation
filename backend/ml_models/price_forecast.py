@@ -1,5 +1,9 @@
 import joblib
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error
 
 from backend.data_pipeline.ingestion import load_data
 from backend.data_pipeline.preprocessing import preprocess
@@ -14,16 +18,28 @@ def train_model():
     df = preprocess(df)
     X, y = build_features(df)
 
-    model = RandomForestRegressor(n_estimators=50, random_state=42)
-    model.fit(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
-    # Save both model AND columns
+    pipeline = Pipeline([
+        ("scaler", StandardScaler()),
+        ("model", RandomForestRegressor(n_estimators=100, random_state=42))
+    ])
+
+    pipeline.fit(X_train, y_train)
+
+    preds = pipeline.predict(X_test)
+    error = mean_absolute_error(y_test, preds)
+
+    print("MAE:", round(error, 2))
+
     joblib.dump({
-        "model": model,
+        "model": pipeline,
         "columns": X.columns.tolist()
     }, MODEL_PATH)
 
-    print("Model trained and saved at:", MODEL_PATH)
+    print("Model trained and saved.")
     
 
 def predict(X):
