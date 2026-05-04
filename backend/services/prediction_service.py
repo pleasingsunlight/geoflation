@@ -1,6 +1,7 @@
 from backend.models.schemas import EventInput, PredictionResponse
 from backend.ml_models.model_loader import get_model
 from backend.data_pipeline.feature_engineering import build_features_from_event
+from backend.ml_models.gnn_model import propagate_shock
 
 
 def predict_event_impact(event: EventInput) -> PredictionResponse:
@@ -20,13 +21,16 @@ def predict_event_impact(event: EventInput) -> PredictionResponse:
 
         oil, gas, delay = preds
 
+        shock_map = propagate_shock(event.country, event.severity)
+        affected_regions = list(shock_map.keys())
+
         return PredictionResponse(
             price_impacts={
                 "oil": f"{round(oil, 2)}%",
                 "gas": f"{round(gas, 2)}%"
             },
             shipping_delay_weeks=int(max(0, delay)),
-            affected_industries=[event.sector.value],
+            affected_industries=affected_regions,
             risk_severity=_map_risk(event.severity)
         )
 
