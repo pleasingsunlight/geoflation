@@ -28,8 +28,11 @@ class EventInput(BaseModel):
 class PredictionResponse(BaseModel):
     price_impacts: Dict[str, str]
     shipping_delay_weeks: int
+    affected_countries: List[str]
     affected_industries: List[str]
     risk_severity: str
+    explanation: str
+
 
 class TradeNode(BaseModel):
     id: str
