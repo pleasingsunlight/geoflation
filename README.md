@@ -6,15 +6,19 @@ It analyzes geopolitical events (sanctions, wars, tariffs, etc.) and predicts th
 
 ---
 
+## Version
+
+Current version: v1.0.0
+
 ## What this project does
 
-* Input a geopolitical event from the web dashboard
-* Run impact prediction using ML + rule-based fallback
-* Simulate trade shock propagation across countries
-* Forecast commodity price movements
-* Estimate shipping delays and risk severity
-* Store predictions in a database
-* Display results and history in a dashboard
+- Input a geopolitical event from the web dashboard
+- Run impact prediction using ML + rule-based fallback
+- Simulate trade shock propagation across countries
+- Forecast commodity price movements
+- Estimate shipping delays and risk severity
+- Store predictions in a database
+- Display results and history in a dashboard
 
 ---
 
@@ -126,34 +130,34 @@ Formatter --> Cache
 Formatter --> API
 ```
 
---- 
+---
 
 ## Tech stack
 
 ### Frontend
 
-* Next.js
-* TailwindCSS
-* Recharts
+- Next.js
+- TailwindCSS
+- Recharts
 
 ### Backend
 
-* FastAPI
-* Python 3.11
-* Uvicorn
-* SQLAlchemy
+- FastAPI
+- Python 3.11
+- Uvicorn
+- SQLAlchemy
 
 ### Machine Learning
 
-* Scikit-learn
-* Prophet
-* NetworkX
+- Scikit-learn
+- Prophet
+- NetworkX
 
 ### Infrastructure
 
-* Docker
-* PostgreSQL
-* Redis
+- Docker
+- PostgreSQL
+- Redis
 
 ---
 
@@ -206,7 +210,7 @@ Output:
 
 ```json
 {
-  "price_impacts": {"oil": "14%", "gas": "9%"},
+  "price_impacts": { "oil": "14%", "gas": "9%" },
   "shipping_delay_weeks": 2,
   "affected_countries": ["iran", "china"],
   "affected_industries": ["energy"],
@@ -267,10 +271,10 @@ npm run dev
 
 The system is fully containerized using Docker.
 
-* Backend runs via Uvicorn inside container
-* Frontend runs as a Next.js production build
-* PostgreSQL handles persistence
-* Redis handles caching
+- Backend runs via Uvicorn inside container
+- Frontend runs as a Next.js production build
+- PostgreSQL handles persistence
+- Redis handles caching
 
 The project can be deployed to platforms like Railway, AWS, or GCP.
 
@@ -302,11 +306,11 @@ Uses Redis to cache expensive computations.
 
 ## Future work
 
-* Replace synthetic data with real datasets
-* Add authentication (JWT)
-* Deploy to cloud infrastructure
-* Implement Graph Neural Networks (PyTorch Geometric)
-* Add LLM-based explanation layer
+- Replace synthetic data with real datasets
+- Add authentication (JWT)
+- Deploy to cloud infrastructure
+- Implement Graph Neural Networks (PyTorch Geometric)
+- Add LLM-based explanation layer
 
 ---
 
