@@ -1,0 +1,15 @@
+services:
+  backend:
+    build: .
+    container_name: geoflation-backend
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: geoflation-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: always
