@@ -1,5 +1,6 @@
 import Charts from "../components/Charts";
 import TradeGraph from "../components/TradeGraph";
+import HistoryPanel from "../components/HistoryPanel";
 
 export default function Dashboard() {
   return (
@@ -8,6 +9,7 @@ export default function Dashboard() {
 
       <Charts />
       <TradeGraph />
+      <HistoryPanel />
     </div>
   );
 }
