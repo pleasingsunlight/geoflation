@@ -3,6 +3,8 @@ from backend.ml_models.model_loader import get_model
 from backend.data_pipeline.feature_engineering import build_features_from_event
 from backend.ml_models.gnn_model import propagate_shock
 from backend.services.explanation_service import generate_explanation
+from backend.config import SessionLocal
+from backend.models.db_models import Prediction
 
 
 def predict_event_impact(event: EventInput) -> PredictionResponse:
@@ -36,6 +38,23 @@ def predict_event_impact(event: EventInput) -> PredictionResponse:
             },
             int(max(0, delay))
         )
+
+        db = SessionLocal()
+
+        db_pred = Prediction(
+            event_type=event.event_type.value,
+            country=event.country,
+            sector=event.sector.value,
+            severity=event.severity,
+            oil_impact=f"{round(oil, 2)}%",
+            gas_impact=f"{round(gas, 2)}%",
+            delay=int(max(0, delay)),
+            risk=_map_risk(event.severity)
+        )
+
+        db.add(db_pred)
+        db.commit()
+        db.close()
 
         return PredictionResponse(
             price_impacts={
