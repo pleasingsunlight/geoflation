@@ -1,15 +1,27 @@
 services:
-  backend:
-    build: .
-    container_name: geoflation-backend
-    ports:
-      - "8000:8000"
+    backend:
+      build: .
+      container_name: geoflation-backend
+      ports:
+        - "8000:8000"
+      depends_on:
+        - db
 
-  frontend:
-    build: ./frontend
-    container_name: geoflation-frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    restart: always
+    frontend:
+      build: ./frontend
+      container_name: geoflation-frontend
+      ports:
+        - "3000:3000"
+      depends_on:
+        - backend
+      restart: always
+
+    db:
+      image: postgres:15
+      container_name: geoflation-db
+      environment:
+        POSTGRES_USER: geoflation
+        POSTGRES_PASSWORD: geoflation
+        POSTGRES_DB: geoflation
+      ports:
+        - "5432:5432"
