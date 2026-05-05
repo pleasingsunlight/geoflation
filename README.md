@@ -80,6 +80,54 @@ Frontend-->>User: Render dashboard
 
 ---
 
+## Internal Pipeline Architecture
+
+```mermaid
+graph TD
+
+API[FastAPI Endpoint /predict-event-impact]
+
+Validation[Pydantic Validation Layer]
+
+FeatureEng[Feature Engineering<br/>One-hot Encoding + Alignment]
+
+FeatureStore[(Feature Schema / Cached Columns)]
+
+ModelRouter[Model Router]
+
+PriceModel[Price Impact Model]
+DelayModel[Delay Prediction Model]
+
+PostProcess[Business Logic Layer<br/>Risk Scoring + Aggregation]
+
+Formatter[Response Builder]
+
+DB[(PostgreSQL - Prediction History)]
+
+Cache[(Redis / In-Memory Cache)]
+
+API --> Validation
+Validation --> FeatureEng
+FeatureEng --> FeatureStore
+
+FeatureEng --> ModelRouter
+
+ModelRouter --> PriceModel
+ModelRouter --> DelayModel
+
+PriceModel --> PostProcess
+DelayModel --> PostProcess
+
+PostProcess --> Formatter
+
+Formatter --> DB
+Formatter --> Cache
+
+Formatter --> API
+```
+
+--- 
+
 ## Tech stack
 
 ### Frontend
