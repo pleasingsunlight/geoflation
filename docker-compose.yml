@@ -6,6 +6,7 @@ services:
         - "8000:8000"
       depends_on:
         - db
+        - redis
 
     frontend:
       build: ./frontend
@@ -25,3 +26,9 @@ services:
         POSTGRES_DB: geoflation
       ports:
         - "5432:5432"
+    
+    redis:
+      image: redis:7
+      container_name: geoflation-redis
+      ports:
+        - "6379:6379"
