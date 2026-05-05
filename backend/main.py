@@ -6,6 +6,7 @@ from backend.api.trade_network import router as trade_router
 from backend.api.commodities import router as commodities_router
 from backend.config import engine
 from backend.models.db_models import Base
+from backend.api.history import router as history_router
 
 app = FastAPI(
     title="Geoflation API",
@@ -28,6 +29,7 @@ app.include_router(health_router)
 app.include_router(predict_router)
 app.include_router(trade_router)
 app.include_router(commodities_router)
+app.include_router(history_router)
 
 
 @app.get("/")
