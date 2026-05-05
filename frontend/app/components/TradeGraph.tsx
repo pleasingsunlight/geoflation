@@ -6,7 +6,7 @@ export default function TradeGraph() {
   const [network, setNetwork] = useState<any>(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/trade-network")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/trade-network`)
       .then((res) => res.json())
       .then(setNetwork);
   }, []);

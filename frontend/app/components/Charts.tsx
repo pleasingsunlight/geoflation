@@ -15,13 +15,20 @@ export default function Charts() {
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/commodity-trends")
-      .then((res) => res.json())
-      .then((res) => {
-        // Transform data for Recharts
+    const fetchData = async () => {
+      try {
+        console.log("Fetching commodity trends...");
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/commodity-trends`
+        );
+
+        const json = await res.json();
+        console.log("API Response:", json);
+
         const merged: any = {};
 
-        res.trends.forEach((series: any) => {
+        json.trends.forEach((series: any) => {
           series.data.forEach((point: any) => {
             if (!merged[point.date]) {
               merged[point.date] = { date: point.date };
@@ -30,9 +37,21 @@ export default function Charts() {
           });
         });
 
-        setData(Object.values(merged));
-      });
+        const finalData = Object.values(merged);
+        console.log("Transformed Data:", finalData);
+
+        setData(finalData);
+      } catch (err) {
+        console.error("Error fetching trends:", err);
+      }
+    };
+
+    fetchData();
   }, []);
+
+  if (!data.length) {
+    return <p>Loading commodity trends...</p>;
+  }
 
   return (
     <div className="w-full h-[400px]">
