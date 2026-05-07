@@ -10,6 +10,12 @@ It analyzes geopolitical events (sanctions, wars, tariffs, etc.) and predicts th
 
 Current version: v1.0.0
 
+## Live Demo
+
+Frontend: https://geoflation.vercel.app
+
+Backend API Docs: https://geoflation-production.up.railway.app/docs
+
 ## What this project does
 
 - Input a geopolitical event from the web dashboard
@@ -50,6 +56,26 @@ Prediction --> Backend
 Backend --> Frontend
 ```
 
+---
+## Deployment Architecture
+
+```mermaid
+graph TD
+
+User[User Browser]
+
+Vercel[Vercel Frontend]
+Railway[Railway Backend]
+
+Postgres[(PostgreSQL)]
+Redis[(Redis)]
+
+User --> Vercel
+Vercel --> Railway
+
+Railway --> Postgres
+Railway --> Redis
+```
 ---
 
 ## Runtime request flow
@@ -269,14 +295,12 @@ npm run dev
 
 ## Deployment
 
-The system is fully containerized using Docker.
-
-- Backend runs via Uvicorn inside container
-- Frontend runs as a Next.js production build
-- PostgreSQL handles persistence
-- Redis handles caching
-
-The project can be deployed to platforms like Railway, AWS, or GCP.
+| Service | Platform |
+|---|---|
+| Frontend | Vercel |
+| Backend | Railway |
+| Database | PostgreSQL (Railway) |
+| Cache | Redis (Railway) |
 
 ---
 
