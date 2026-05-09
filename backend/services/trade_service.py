@@ -41,24 +41,38 @@ def get_trade_network() -> TradeNetworkResponse:
     return TradeNetworkResponse(**network)
 
 
-def get_commodity_trends() -> CommodityTrendsResponse:
-    cached = get_cache("commodity_trends")
+def get_commodity_trends():
+    cached = get_cache(
+        "commodity_trends"
+    )
 
     if cached:
         return cached
 
-    oil = forecast_commodity(80)
-    gas = forecast_commodity(50)
-    wheat = forecast_commodity(30)
+    oil = forecast_commodity("oil")
+    gas = forecast_commodity("gas")
+    wheat = forecast_commodity("wheat")
 
     result = {
         "trends": [
-            {"commodity": "oil", "data": oil},
-            {"commodity": "gas", "data": gas},
-            {"commodity": "wheat", "data": wheat},
+            {
+                "commodity": "oil",
+                "data": oil
+            },
+            {
+                "commodity": "gas",
+                "data": gas
+            },
+            {
+                "commodity": "wheat",
+                "data": wheat
+            }
         ]
     }
 
-    set_cache("commodity_trends", result)
+    set_cache(
+        "commodity_trends",
+        result
+    )
 
     return result
