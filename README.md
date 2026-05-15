@@ -2,13 +2,22 @@
 
 Geoflation is an end-to-end geopolitical trade shock prediction platform with a dashboard frontend and a FastAPI backend.
 
-It analyzes geopolitical events (sanctions, wars, tariffs, etc.) and predicts their impact on global trade flows, supply chains, and commodity markets.
+It analyzes geopolitical events (sanctions, wars, tariffs, embargoes, naval blockades, port disruptions, etc.) and predicts their impact on global trade flows, supply chains, shipping networks, and commodity markets.
+
+The platform combines:
+- real commodity forecasting
+- trade network graph propagation
+- ML-driven prediction pipelines
+- geopolitical risk simulation
+- production-grade infrastructure
 
 ---
 
 ## Version
 
-Current version: v1.0.0
+Current version: v1.1.0
+
+---
 
 ## Live Demo
 
@@ -16,15 +25,19 @@ Frontend: https://geoflation.vercel.app
 
 Backend API Docs: https://geoflation-production.up.railway.app/docs
 
+---
+
 ## What this project does
 
 - Input a geopolitical event from the web dashboard
-- Run impact prediction using ML + rule-based fallback
-- Simulate trade shock propagation across countries
-- Forecast commodity price movements
+- Run event impact prediction using ML + rule-based fallback
+- Forecast commodity price disruptions using real historical datasets
+- Simulate weighted trade shock propagation across countries
+- Model cascading multi-hop geopolitical disruptions
 - Estimate shipping delays and risk severity
-- Store predictions in a database
-- Display results and history in a dashboard
+- Store predictions in PostgreSQL
+- Cache expensive computations with Redis
+- Display forecasts, trade graphs, and prediction history in a dashboard
 
 ---
 
@@ -36,27 +49,40 @@ graph TD
 User[User Browser]
 Frontend[Next.js Frontend]
 Backend[FastAPI Backend]
+
+API[API Layer]
 Prediction[Prediction Service]
-Graph[Graph Propagation]
-Forecast[Time Series Forecast]
+
+Graph[Trade Graph Propagation Engine]
+Forecast[Commodity Forecast Engine]
+
+TradeData[Trade Network Dataset]
+CommodityData[Commodity Price Dataset]
+
 DB[(PostgreSQL)]
 Cache[(Redis)]
 
 User --> Frontend
 Frontend --> Backend
 
-Backend --> Prediction
+Backend --> API
+API --> Prediction
+
 Prediction --> Graph
 Prediction --> Forecast
 
-Backend --> DB
-Backend --> Cache
+Graph --> TradeData
+Forecast --> CommodityData
+
+Prediction --> DB
+Prediction --> Cache
 
 Prediction --> Backend
 Backend --> Frontend
 ```
 
 ---
+
 ## Deployment Architecture
 
 ```mermaid
@@ -76,9 +102,10 @@ Vercel --> Railway
 Railway --> Postgres
 Railway --> Redis
 ```
+
 ---
 
-## Runtime request flow
+## Runtime Request Flow
 
 ```mermaid
 sequenceDiagram
@@ -87,10 +114,12 @@ participant User
 participant Frontend
 participant Backend
 participant Cache
-participant ML
+participant Forecast
+participant Graph
 participant DB
 
-User->>Frontend: Submit event
+User->>Frontend: Submit geopolitical event
+
 Frontend->>Backend: POST /predict-event-impact
 
 Backend->>Cache: Check cache
@@ -98,14 +127,19 @@ Backend->>Cache: Check cache
 alt Cache hit
     Cache-->>Backend: Cached response
 else Cache miss
-    Backend->>ML: Run prediction
-    Backend->>Backend: Graph propagation
-    Backend->>Backend: Forecast commodities
-    Backend->>DB: Store result
+
+    Backend->>Forecast: Forecast commodity impacts
+    Forecast-->>Backend: Oil/Gas/Wheat projections
+
+    Backend->>Graph: Run propagation engine
+    Graph-->>Backend: Cascading impacted countries
+
+    Backend->>DB: Store prediction
 end
 
-Backend-->>Frontend: Response
-Frontend-->>User: Render dashboard
+Backend-->>Frontend: Prediction response
+
+Frontend-->>User: Render dashboard + graphs
 ```
 
 ---
@@ -125,8 +159,16 @@ FeatureStore[(Feature Schema / Cached Columns)]
 
 ModelRouter[Model Router]
 
-PriceModel[Price Impact Model]
-DelayModel[Delay Prediction Model]
+PriceModel[Commodity Impact Model]
+DelayModel[Shipping Delay Model]
+
+TradeGraph[Trade Network Propagation Engine]
+
+ForecastEngine[Prophet Forecasting Engine]
+
+CommodityData[(Historical Commodity Dataset)]
+
+TradeDataset[(Trade Network Dataset)]
 
 PostProcess[Business Logic Layer<br/>Risk Scoring + Aggregation]
 
@@ -145,8 +187,15 @@ FeatureEng --> ModelRouter
 ModelRouter --> PriceModel
 ModelRouter --> DelayModel
 
-PriceModel --> PostProcess
+PriceModel --> ForecastEngine
+ForecastEngine --> CommodityData
+
 DelayModel --> PostProcess
+
+TradeGraph --> TradeDataset
+TradeGraph --> PostProcess
+
+ForecastEngine --> PostProcess
 
 PostProcess --> Formatter
 
@@ -158,7 +207,7 @@ Formatter --> API
 
 ---
 
-## Tech stack
+## Tech Stack
 
 ### Frontend
 
@@ -173,38 +222,56 @@ Formatter --> API
 - Uvicorn
 - SQLAlchemy
 
-### Machine Learning
+### Machine Learning & Analytics
 
 - Scikit-learn
 - Prophet
 - NetworkX
+- Pandas
+- NumPy
 
 ### Infrastructure
 
 - Docker
 - PostgreSQL
 - Redis
+- Railway
+- Vercel
 
 ---
 
-## Repository structure
+## Repository Structure
 
-```
+```text
 geoflation/
 ├── backend/
 │   ├── main.py
 │   ├── api/
 │   ├── ml_models/
+│   │   ├── price_forecast.py
+│   │   ├── trade_propagation.py
+│   │   └── model_loader.py
 │   ├── services/
 │   ├── data_pipeline/
+│   │   ├── preprocess_commodity_data.py
+│   │   └── load_trade_network.py
 │   ├── models/
 │   ├── utils/
 │   └── config.py
+│
 ├── frontend/
 │   ├── app/
 │   ├── components/
 │   └── styles/
+│
 ├── data/
+│   ├── raw/
+│   │   ├── commodities/
+|   |       └──commodity_prices_processed.csv
+│   │   └── trade/
+|   |       └──trade_edges.csv 
+│   └── processed/
+│
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
@@ -213,11 +280,13 @@ geoflation/
 
 ---
 
-## API overview
+## API Overview
 
 ### GET /health
 
 Returns backend health status.
+
+---
 
 ### POST /predict-event-impact
 
@@ -225,10 +294,10 @@ Input:
 
 ```json
 {
-  "event_type": "sanction",
-  "country": "Iran",
-  "sector": "oil",
-  "severity": 0.8
+  "event_type": "war",
+  "country": "Russia",
+  "sector": "energy",
+  "severity": 0.9
 }
 ```
 
@@ -236,58 +305,116 @@ Output:
 
 ```json
 {
-  "price_impacts": { "oil": "14%", "gas": "9%" },
+  "price_impacts": {
+    "oil": "17.41%",
+    "gas": "13.07%"
+  },
   "shipping_delay_weeks": 2,
-  "affected_countries": ["iran", "china"],
-  "affected_industries": ["energy"],
+  "impacted_countries": {
+    "China": 0.72,
+    "EU": 0.63,
+    "USA": 0.48
+  },
+  "affected_industries": [
+    "energy"
+  ],
   "risk_severity": "High",
   "explanation": "..."
 }
 ```
 
+---
+
 ### GET /commodity-trends
 
-Returns time-series forecast data.
-
-### GET /trade-network
-
-Returns trade graph data.
-
-### GET /prediction-history
-
-Returns stored prediction history.
+Returns Prophet-generated commodity forecasting data using historical datasets.
 
 ---
 
-## Local development
+### GET /trade-network
 
-### 1) Full stack (Docker)
+Returns weighted trade graph data used for geopolitical propagation.
+
+---
+
+### GET /prediction-history
+
+Returns stored historical predictions from PostgreSQL.
+
+---
+
+## Real Data Sources
+
+### Commodity Price Data
+
+Source:
+World Bank Pink Sheet Dataset
+
+Integrated:
+- crude oil
+- natural gas
+- wheat
+
+Dataset frequency:
+- monthly historical data
+- 1960 → present
+
+---
+
+### Trade Network Data
+
+Current version uses:
+- curated weighted trade relationships
+- NetworkX directed graph modeling
+
+Foundation prepared for:
+- UN Comtrade integration
+- large-scale graph ingestion
+- Graph Neural Networks
+
+---
+
+## Local Development
+
+### 1) Full Stack (Docker)
 
 ```bash
 docker-compose up --build
 ```
 
-Frontend: [http://localhost:3000](http://localhost:3000)
-Backend: [http://localhost:8000/docs](http://localhost:8000/docs)
+Frontend:
+http://localhost:3000
+
+Backend:
+http://localhost:8000/docs
 
 ---
 
-### 2) Backend (manual)
+### 2) Backend (Manual)
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # or Windows equivalent
+
+# Windows
+venv\Scripts\activate
+
+# Linux / macOS
+source venv/bin/activate
+
 pip install -r requirements.txt
+
 uvicorn backend.main:app --reload
 ```
 
 ---
 
-### 3) Frontend (manual)
+### 3) Frontend (Manual)
 
 ```bash
 cd frontend
+
 npm install
+
 npm run dev
 ```
 
@@ -304,37 +431,61 @@ npm run dev
 
 ---
 
-## Core components
+## Core Components
 
-### Prediction service
+### Prediction Service
 
-Handles event → impact prediction using ML models.
-
-### Graph propagation
-
-Simulates how shocks spread across trade networks.
-
-### Forecasting
-
-Generates commodity trends using time-series models.
-
-### Persistence layer
-
-Stores prediction history in PostgreSQL.
-
-### Caching layer
-
-Uses Redis to cache expensive computations.
+Handles geopolitical event → disruption prediction using ML models.
 
 ---
 
-## Future work
+### Trade Graph Propagation Engine
 
-- Replace synthetic data with real datasets
-- Add authentication (JWT)
-- Deploy to cloud infrastructure
-- Implement Graph Neural Networks (PyTorch Geometric)
-- Add LLM-based explanation layer
+Simulates weighted cascading trade disruptions across global trade networks.
+
+Supports:
+- multi-hop propagation
+- severity decay
+- graph traversal
+
+---
+
+### Commodity Forecasting Engine
+
+Uses Prophet-based time-series forecasting on real historical commodity datasets.
+
+Forecasted commodities:
+- oil
+- gas
+- wheat
+
+---
+
+### Persistence Layer
+
+Stores prediction history in PostgreSQL.
+
+---
+
+### Caching Layer
+
+Uses Redis to cache:
+- commodity forecasts
+- trade network responses
+- expensive graph computations
+
+---
+
+## Future Work
+
+- Full UN Comtrade ingestion pipeline
+- Graph centrality scoring
+- Country vulnerability indices
+- JWT authentication
+- Graph Neural Networks (PyTorch Geometric)
+- LLM-based strategic explanation layer
+- Probabilistic geopolitical forecasting
+- Maritime chokepoint disruption modeling
 
 ---
 
