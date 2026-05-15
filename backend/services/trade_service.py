@@ -6,39 +6,50 @@ from backend.ml_models.price_forecast import forecast_commodity
 from backend.utils.cache import get_cache, set_cache
 
 
-def get_trade_network() -> TradeNetworkResponse:
-    """
-    Mock trade network (cached)
-    """
+from backend.data_pipeline.load_trade_network import (
+    load_trade_network
+)
 
-    # Try cache first
-    cached = get_cache("trade_network")
+
+def get_trade_network():
+    cached = get_cache(
+        "trade_network"
+    )
+
     if cached:
-        return TradeNetworkResponse(**cached)
+        return cached
 
-    # Build network
+    graph, df = load_trade_network()
+
     nodes = [
-        TradeNode(id="russia", name="Russia", type="country"),
-        TradeNode(id="china", name="China", type="country"),
-        TradeNode(id="eu", name="European Union", type="country"),
-        TradeNode(id="oil", name="Oil", type="commodity"),
+        {
+            "id": node,
+            "name": node,
+            "type": "country"
+        }
+        for node in graph.nodes()
     ]
 
     edges = [
-        TradeEdge(source="russia", target="eu", weight=0.9),
-        TradeEdge(source="russia", target="china", weight=0.7),
-        TradeEdge(source="oil", target="eu", weight=0.8),
+        {
+            "source": row["source"],
+            "target": row["target"],
+            "weight": row["weight"]
+        }
+        for _, row in df.iterrows()
     ]
 
-    network = {
-        "nodes": [node.dict() for node in nodes],
-        "edges": [edge.dict() for edge in edges],
+    result = {
+        "nodes": nodes,
+        "edges": edges
     }
 
-    # Store in cache
-    set_cache("trade_network", network)
+    set_cache(
+        "trade_network",
+        result
+    )
 
-    return TradeNetworkResponse(**network)
+    return result
 
 
 def get_commodity_trends():
