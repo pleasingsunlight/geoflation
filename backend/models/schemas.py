@@ -28,7 +28,7 @@ class EventInput(BaseModel):
 class PredictionResponse(BaseModel):
     price_impacts: Dict[str, str]
     shipping_delay_weeks: int
-    affected_countries: List[str]
+    impacted_countries: dict[str, float]
     affected_industries: List[str]
     risk_severity: str
     explanation: str
