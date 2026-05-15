@@ -7,6 +7,7 @@ from backend.api.commodities import router as commodities_router
 from backend.config import engine
 from backend.models.db_models import Base
 from backend.api.history import router as history_router
+import os
 
 app = FastAPI(
     title="Geoflation API",
@@ -35,9 +36,6 @@ app.include_router(history_router)
 @app.get("/")
 def root():
     return {"message": "Geoflation API is running"}
-
-
-import os
 
 if __name__ == "__main__":
     import uvicorn
