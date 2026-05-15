@@ -36,17 +36,23 @@ export default function ImpactPanel({ data }: Props) {
           ))}
         </ul>
       </div>
-
-      {/* Industries */}
+      
+      {/* Impacted Countries */}
       <div className="p-4 border rounded">
-        <h2 className="font-semibold">Affected Countries</h2>
+        <h2 className="font-semibold">Impacted Countries</h2>
+
         <ul className="mt-2">
-          {data.affected_countries.map((c: string) => (
-            <li key={c}>{c}</li>
+          {Object.entries(
+            data.impacted_countries || {}
+          ).map(([country, impact]) => (
+            <li key={country}>
+              {country}: {String(impact)}
+            </li>
           ))}
         </ul>
       </div>
 
+      {/* Industries */}
       <div className="p-4 border rounded">
         <h2 className="font-semibold">Affected Industries</h2>
         <ul className="mt-2">
