@@ -1,7 +1,3 @@
-from backend.models.schemas import TradeNode, TradeEdge, TradeNetworkResponse
-from datetime import datetime, timedelta
-import random
-from backend.models.schemas import CommodityPoint, CommoditySeries, CommodityTrendsResponse
 from backend.ml_models.price_forecast import forecast_commodity
 from backend.utils.cache import get_cache, set_cache
 
