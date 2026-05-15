@@ -21,8 +21,16 @@ venv/
 # Data
 data/raw/*
 data/processed/*
+
 !data/raw/.keep
 !data/processed/.keep
+
+# Required datasets
+!data/raw/trade/
+!data/raw/trade/trade_edges.csv
+
+!data/processed/commodities/
+!data/processed/commodities/commodity_prices_processed.csv
 
 # Node
 node_modules/
