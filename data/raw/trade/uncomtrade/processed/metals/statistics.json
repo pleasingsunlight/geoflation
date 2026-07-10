@@ -1,0 +1,20 @@
+{
+    "dataset": "metals",
+    "generated_at": "2026-07-10T11:35:55.683398+00:00",
+    "trade_records": 19434,
+    "reporter_countries": 15,
+    "partner_countries": 239,
+    "unique_trade_pairs": 2669,
+    "exports": 19434,
+    "imports": 0,
+    "total_trade_value": 1703408536920.552,
+    "average_trade_value": 87650948.69406977,
+    "median_trade_value": 317950.7955,
+    "min_trade_value": 0.221,
+    "max_trade_value": 50299010715.668,
+    "missing_values": {
+        "reporterISO": 0,
+        "partnerISO": 0,
+        "trade_value_usd": 0
+    }
+}

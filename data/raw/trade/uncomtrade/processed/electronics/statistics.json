@@ -1,0 +1,20 @@
+{
+    "dataset": "electronics",
+    "generated_at": "2026-07-10T11:35:55.283023+00:00",
+    "trade_records": 9309,
+    "reporter_countries": 15,
+    "partner_countries": 242,
+    "unique_trade_pairs": 2942,
+    "exports": 9309,
+    "imports": 0,
+    "total_trade_value": 7546063577454.992,
+    "average_trade_value": 810620214.5724559,
+    "median_trade_value": 4273830.832,
+    "min_trade_value": 1.0,
+    "max_trade_value": 477629254565.48,
+    "missing_values": {
+        "reporterISO": 0,
+        "partnerISO": 0,
+        "trade_value_usd": 0
+    }
+}
