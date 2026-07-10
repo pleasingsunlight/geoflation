@@ -1,0 +1,20 @@
+{
+    "dataset": "automotive",
+    "generated_at": "2026-07-10T11:35:55.113469+00:00",
+    "trade_records": 4109,
+    "reporter_countries": 15,
+    "partner_countries": 241,
+    "unique_trade_pairs": 2606,
+    "exports": 4109,
+    "imports": 0,
+    "total_trade_value": 3513542663717.378,
+    "average_trade_value": 855084610.2987047,
+    "median_trade_value": 5068677.357,
+    "min_trade_value": 5.246,
+    "max_trade_value": 287592518637.984,
+    "missing_values": {
+        "reporterISO": 0,
+        "partnerISO": 0,
+        "trade_value_usd": 0
+    }
+}

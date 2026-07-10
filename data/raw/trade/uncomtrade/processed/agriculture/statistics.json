@@ -1,0 +1,20 @@
+{
+    "dataset": "agriculture",
+    "generated_at": "2026-07-10T11:35:55.023858+00:00",
+    "trade_records": 7258,
+    "reporter_countries": 15,
+    "partner_countries": 232,
+    "unique_trade_pairs": 2066,
+    "exports": 7258,
+    "imports": 0,
+    "total_trade_value": 484264410769.06104,
+    "average_trade_value": 66721467.45233688,
+    "median_trade_value": 426341.0,
+    "min_trade_value": 0.055,
+    "max_trade_value": 44671893784.0,
+    "missing_values": {
+        "reporterISO": 0,
+        "partnerISO": 0,
+        "trade_value_usd": 0
+    }
+}
