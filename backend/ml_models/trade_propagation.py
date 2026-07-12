@@ -1,81 +1,129 @@
-from collections import deque
+"""
+trade_propagation.py
 
-from backend.data_pipeline.load_trade_network import (
-    load_trade_network
-)
+Shock propagation over the real UN Comtrade trade graph.
+"""
+
+from __future__ import annotations
+
+from backend.graph.graph_loader import load_trade_graph
 
 
-DECAY_FACTOR = 0.6
-MAX_DEPTH = 3
+_GRAPH = None
+
+
+def _get_graph():
+    """
+    Lazy-load the trade graph.
+    """
+
+    global _GRAPH
+
+    if _GRAPH is None:
+        _GRAPH = load_trade_graph()
+
+    return _GRAPH
 
 
 def propagate_trade_shock(
-    source_country,
-    severity
+    source_country: str,
+    severity: float,
+    max_neighbors: int = 10,
 ):
-    graph, _ = load_trade_network()
+    """
+    Propagate a geopolitical shock through the trade graph.
 
-    impacted = {}
+    Returns
+    -------
+    dict
+
+    {
+        "CHN":0.82,
+        "USA":0.55,
+        ...
+    }
+    """
+
+    graph = _get_graph()
 
     if source_country not in graph:
-        return impacted
-
-    queue = deque()
-
-    queue.append(
-        (
-            source_country,
-            severity,
-            0
+        raise ValueError(
+            f"{source_country} not present in trade graph."
         )
+
+    edges = []
+
+    total_trade = 0.0
+
+    for _, target, data in graph.out_edges(
+        source_country,
+        data=True
+    ):
+
+        trade_value = float(
+            data.get(
+                "total_trade_value",
+                0.0
+            )
+        )
+
+        if trade_value <= 0:
+            continue
+
+        total_trade += trade_value
+
+        edges.append(
+            (
+                target,
+                trade_value
+            )
+        )
+
+    if total_trade == 0:
+
+        return {}
+
+    impacts = {}
+
+    for target, trade_value in edges:
+
+        score = (
+            trade_value
+            / total_trade
+        ) * severity
+
+        impacts[target] = round(
+            score,
+            4
+        )
+
+    impacts = dict(
+
+        sorted(
+            impacts.items(),
+            key=lambda x: x[1],
+            reverse=True
+        )[:max_neighbors]
+
     )
 
-    visited = set()
+    return impacts
 
-    while queue:
-        current, current_severity, depth = queue.popleft()
 
-        if depth >= MAX_DEPTH:
-            continue
+if __name__ == "__main__":
 
-        if current in visited:
-            continue
+    impacts = propagate_trade_shock(
+        "USA",
+        severity=0.8
+    )
 
-        visited.add(current)
+    print()
 
-        neighbors = graph[current]
+    print("Propagation Result")
 
-        for neighbor in neighbors:
-            edge_data = graph[current][neighbor]
+    print("-" * 60)
 
-            weight = edge_data.get(
-                "weight",
-                1
-            )
-
-            propagated_impact = round(
-                current_severity
-                * (weight / 100)
-                * (DECAY_FACTOR ** depth),
-                2
-            )
-
-            existing = impacted.get(
-                neighbor,
-                0
-            )
-
-            impacted[neighbor] = max(
-                existing,
-                propagated_impact
-            )
-
-            queue.append(
-                (
-                    neighbor,
-                    propagated_impact,
-                    depth + 1
-                )
-            )
-
-    return impacted
+    for country, score in impacts.items():
+        print(
+            f"{country:>5} : {score:.4f}"
+        )
